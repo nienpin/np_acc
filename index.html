@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NP記帳程式 V2.1</title>
+
+<style>
+
+body{
+    background:#1e1e1e;
+    color:white;
+    font-family:"Consolas";
+    margin:20px;
+}
+
+h1{
+    color:#4CAF50;
+}
+
+input,select{
+    background:#333;
+    color:white;
+    border:1px solid #666;
+    padding:8px;
+    margin:5px;
+}
+
+button{
+    background:#4CAF50;
+    color:white;
+    border:none;
+    padding:8px 15px;
+    cursor:pointer;
+    margin:5px;
+}
+
+button:hover{
+    opacity:0.9;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:15px;
+}
+
+th,td{
+    border:1px solid #555;
+    padding:8px;
+    text-align:center;
+}
+
+th{
+    background:#333;
+}
+
+.summary{
+    margin-top:20px;
+    background:#2a2a2a;
+    padding:15px;
+    border-radius:10px;
+}
+
+.currency-box{
+    margin-top:10px;
+    padding:8px;
+    background:#333;
+    border-radius:5px;
+}
+
+.search-box{
+    margin-top:15px;
+}
+
+.danger-btn{
+    background:#dc3545;
+    color:white;
+}
+
+.danger-btn:hover{
+    background:#bb2d3b;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>💰💰💰 NP記帳程式 V2.1</h1>
+
+<div>
+
+<input type="date" id="date">
+
+<input
+type="text"
+id="item"
+placeholder="項目">
+
+<select id="currency">
+<option>EUR</option>
+<option>TWD</option>
+<option>USD</option>
+<option>MXN</option>
+<option>CZK</option>
+<option>SGD</option>
+<option>HUF</option>
+<option>JPY</option>
+<option>CNY</option>
+</select>
+
+<input
+type="number"
+id="amount"
+placeholder="金額">
+
+<select id="paymentType">
+    <option>現金</option>
+    <option>刷卡</option>
+</select>
+
+<label>
+<input
+type="checkbox"
+id="receipt">
+有單據
+</label>
+
+<button onclick="addRecord()">
+新增
+</button>
+
+<button onclick="exportCSV()">
+匯出CSV
+</button>
+
+<button 
+    onclick="clearAllData()"
+    class="danger-btn">
+    🗑️ 清除所有資料
+</button>
+
+</div>
+
+<div class="search-box">
+
+<input
+type="text"
+id="search"
+placeholder="搜尋項目..."
+onkeyup="render()">
+
+</div>
+
+<table>
+
+<thead>
+
+<tr>
+<th>日期</th>
+<th>項目</th>
+<th>貨幣</th>
+<th>金額</th>
+<th>付款方式</th>
+<th>單據</th>
+<th>刪除</th>
+</tr>
+
+</thead>
+
+<tbody id="tbody">
+</tbody>
+
+</table>
+
+<div class="summary">
+
+<h3>統計資訊</h3>
+
+<div id="count"></div>
+
+<div id="currencySummary">
+</div>
+
+</div>
+
+<script>
+
+let records =
+JSON.parse(
+localStorage.getItem("expenseData")
+) || [];
+
+
+function saveData(){
+
+localStorage.setItem(
+"expenseData",
+JSON.stringify(records)
+);
+
+}
+
+
+function addRecord(){
+
+let date =
+document.getElementById("date").value;
+
+let item =
+document.getElementById("item").value;
+
+let amount =
+Number(
+document.getElementById("amount").value
+);
+
+if(
+!date ||
+!item ||
+amount <= 0
+){
+alert("請完整輸入資料");
+return;
+}
+
+let data = {
+
+date:date,
+
+currency:
+document.getElementById("currency").value,
+
+item:item,
+
+amount:amount,
+
+paymentType:
+    document.getElementById("paymentType").value,
+
+receipt:
+document.getElementById("receipt").checked
+
+};
+
+records.push(data);
+
+saveData();
+
+render();
+
+document.getElementById("item").value="";
+document.getElementById("amount").value="";
+document.getElementById("receipt").checked=false;
+
+}
+
+
+function deleteRow(index){
+
+if(confirm("確定刪除？")){
+
+records.splice(index,1);
+
+saveData();
+
+render();
+
+}
+}
+
+function clearAllData(){
+
+    let result = confirm(
+        "確定要清除所有資料？\n\n此動作無法復原！"
+    );
+
+    if(result){
+
+        records = [];
+
+        localStorage.removeItem(
+            "expenseData"
+        );
+
+        render();
+
+        alert("資料已全部清除");
+
+    }
+
+}
+
+
+
+
+function render(){
+
+let tbody =
+document.getElementById("tbody");
+
+tbody.innerHTML="";
+
+let searchText =
+document.getElementById("search")
+.value
+.toLowerCase();
+
+let currencyTotals = {};
+
+records.forEach((r,index)=>{
+
+if(
+searchText &&
+!r.item.toLowerCase().includes(searchText)
+){
+return;
+}
+
+if(!currencyTotals[r.currency]){
+
+currencyTotals[r.currency]=0;
+
+}
+
+currencyTotals[r.currency]+=r.amount;
+
+tbody.innerHTML += `
+<tr>
+<td>${r.date}</td>
+<td>${r.item}</td>
+<td>${r.currency}</td>
+<td>
+${r.amount.toLocaleString(
+    undefined,
+    {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }
+)}
+</td>
+<td>${r.paymentType}</td>
+<td>${r.receipt ? "✅" : "❌"}</td>
+<td>
+<button
+onclick="deleteRow(${index})"
+ class="danger-btn">
+刪除
+</button>
+</td>
+</tr>
+`;
+
+});
+
+document.getElementById("count").innerHTML =
+`總花費筆數：${records.length}`;
+
+let html = "";
+
+for(let currency in currencyTotals){
+
+html += `
+<div class="currency-box">
+<strong>${currency}</strong>
+：
+${currencyTotals[currency].toLocaleString(
+    undefined,
+    {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }
+)}
+</div>
+`;
+
+}
+
+document.getElementById(
+"currencySummary"
+).innerHTML = html;
+
+}
+
+
+function exportCSV(){
+
+let csv =
+"日期,項目,貨幣,金額,付款方式,有單據\n";
+
+records.forEach(r=>{
+
+csv +=
+`${r.date},${r.item},${r.currency},${r.amount},${r.paymentType},${r.receipt ? "是":"否"}\n`;
+
+});
+
+let blob =
+new Blob(
+[csv],
+{
+type:"text/csv;charset=utf-8;"
+}
+);
+
+let link =
+document.createElement("a");
+
+link.href =
+URL.createObjectURL(blob);
+
+link.download =
+"expense_report.csv";
+
+link.click();
+
+}
+
+document.getElementById("date").value =
+new Date().toISOString().split("T")[0];
+
+render();
+
+</script>
+
+</body>
+</html>
