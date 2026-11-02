@@ -463,7 +463,7 @@ function exportCSV(){
     records.forEach(r=>{
 
         csv +=
-`${r.date},${r.item},${r.currency},${r.amount},${r.payment_type},${r.receipt ? "是":"否"}\n`;
+`${r.date},${r.person},${r.item},${r.currency},${r.amount},${r.payment_type},${r.receipt ? "是":"否"}\n`;
 
     });
 
