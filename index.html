@@ -347,6 +347,12 @@ function render(){
     .value
     .toLowerCase();
 
+    let selectedPerson =
+    document
+    .getElementById("personFilter")
+    .value;
+
+
     let currencyTotals = {};
 
     records.forEach(r=>{
@@ -360,6 +366,15 @@ function render(){
             return;
         }
 
+        if(
+        selectedPerson &&
+        r.person !== selectedPerson
+        ){
+            return;
+        } 
+
+
+        
         if(!currencyTotals[r.currency]){
 
             currencyTotals[r.currency]=0;
@@ -432,17 +447,7 @@ function render(){
     .getElementById("currencySummary")
     .innerHTML = html;
 
-    let selectedPerson =
-    document
-    .getElementById("personFilter")
-    .value;
 
-    if(
-    selectedPerson &&
-    r.person !== selectedPerson
-){
-    return;
-} 
 
 
 }
