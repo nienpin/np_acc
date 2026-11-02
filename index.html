@@ -141,6 +141,16 @@ id="search"
 placeholder="搜尋項目..."
 onkeyup="render()">
 
+<select
+id="personFilter"
+onchange="render()">
+
+<option value="">
+全部人員
+</option>
+
+</select>
+
 <table>
 
 <thead>
@@ -173,15 +183,7 @@ onkeyup="render()">
 
 </div>
 
-<select
-id="personFilter"
-onchange="render()">
 
-<option value="">
-全部人員
-</option>
-
-</select>
 
 
 <script>
