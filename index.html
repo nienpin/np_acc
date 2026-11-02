@@ -152,6 +152,7 @@ onkeyup="render()">
 <th>金額</th>
 <th>付款方式</th>
 <th>單據</th>
+<th>刪除</th>
 </tr>
 
 </thead>
@@ -334,6 +335,37 @@ async function addRecord(){
 
 }
 
+async function deleteRecord(id){
+
+    let result = confirm(
+        "確定要刪除這筆資料？"
+    );
+
+    if(!result){
+        return;
+    }
+
+    const { error } =
+    await supabaseClient
+    .from("np_acc")
+    .delete()
+    .eq("id", id);
+
+    if(error){
+
+        console.error(error);
+
+        alert(error.message);
+
+        return;
+
+    }
+
+    await loadData();
+
+}
+
+
 function render(){
 
     let tbody =
@@ -411,6 +443,24 @@ function render(){
 
         <td>
             ${r.receipt ? "✅":"❌"}
+        </td>
+
+        <td>
+
+        <button
+        onclick="deleteRecord(${r.id})"
+        style="
+        background:#dc3545;
+        color:white;
+        border:none;
+        padding:5px 10px;
+        cursor:pointer;
+        ">
+
+        刪除
+
+        </button>
+
         </td>
 
         </tr>
