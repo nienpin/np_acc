@@ -146,7 +146,7 @@ id="personFilter"
 onchange="render()">
 
 <option value="">
-全部人員
+全部人員/單位
 </option>
 
 </select>
@@ -249,7 +249,7 @@ async function loadPersons(){
     personSelect.innerHTML = "";
 
     filterSelect.innerHTML =
-    '<option value="">全部人員</option>';
+    '<option value="">全部人員/單位</option>';
 
     data.forEach(p=>{
 
