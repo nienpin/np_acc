@@ -354,6 +354,7 @@ function render(){
 
 
     let currencyTotals = {};
+    let filteredCount = 0;
 
     records.forEach(r=>{
 
@@ -372,6 +373,8 @@ function render(){
         ){
             return;
         } 
+
+        filteredCount++;
 
 
         
@@ -416,8 +419,8 @@ function render(){
 
     });
 
-    document.getElementById("count").innerHTML =
-    `總筆數：${records.length}`;
+        document.getElementById("count").innerHTML =
+        `篩選結果：${filteredCount} 筆`;
 
     let html="";
 
