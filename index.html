@@ -85,13 +85,6 @@ th{
 <input type="date" id="date">
 
 <select id="person">
-
-    <option>王微明</option>
-    <option>王小明</option>
-    <option>王中明</option>
-    <option>王大明</option>
-    <option>王巨明</option>
-
 </select>
 
 <input
@@ -178,6 +171,17 @@ onkeyup="render()">
 
 </div>
 
+<select
+id="personFilter"
+onchange="render()">
+
+<option value="">
+全部人員
+</option>
+
+</select>
+
+
 <script>
 
     const SUPABASE_URL =
@@ -213,6 +217,45 @@ async function loadData(){
     records = data || [];
 
     render();
+
+}
+
+async function loadPersons(){
+
+    const { data , error } =
+    await supabaseClient
+    .from("np_person")
+    .select("*")
+    .order("id");
+
+    if(error){
+
+        console.error(error);
+
+        return;
+
+    }
+
+    let personSelect =
+    document.getElementById("person");
+
+    let filterSelect =
+    document.getElementById("personFilter");
+
+    personSelect.innerHTML = "";
+
+    filterSelect.innerHTML =
+    '<option value="">全部人員</option>';
+
+    data.forEach(p=>{
+
+        personSelect.innerHTML +=
+        `<option>${p.name}</option>`;
+
+        filterSelect.innerHTML +=
+        `<option>${p.name}</option>`;
+
+    });
 
 }
 
@@ -389,6 +432,19 @@ function render(){
     .getElementById("currencySummary")
     .innerHTML = html;
 
+    let selectedPerson =
+    document
+    .getElementById("personFilter")
+    .value;
+
+    if(
+    selectedPerson &&
+    r.person !== selectedPerson
+){
+    return;
+} 
+
+
 }
 
 function exportCSV(){
@@ -428,6 +484,7 @@ function exportCSV(){
 document.getElementById("date").value =
 new Date().toISOString().split("T")[0];
 
+loadPersons();
 loadData();
 
 </script>
